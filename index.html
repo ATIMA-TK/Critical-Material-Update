@@ -3,541 +3,743 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Executive Dashboard - Materials Logistics Evaluation 2026 | Thai Lion Air</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <title>Executive Critical Materials Logistics Dashboard - Thai Lion Air 2026</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
+        :root {
+            --navy-dark: #0F172A;
+            --navy-mid: #1E293B;
+            --blue-accent: #2563EB;
+            --blue-hover: #1D4ED8;
+            --bg-light: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --status-green-bg: #DCFCE7;
+            --status-green-text: #166534;
+            --status-yellow-bg: #FEF9C3;
+            --status-yellow-text: #854D0E;
+            --status-red-bg: #FEE2E2;
+            --status-red-text: #991B1B;
+            --status-blue-bg: #DBEAFE;
+            --status-blue-text: #1E40AF;
+            --status-gray-bg: #F1F5F9;
+            --status-gray-text: #475569;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0F172A;
-            color: #F8FAFC;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            padding: 24px;
+            line-height: 1.5;
         }
 
-        .chart-container {
-            position: relative;
+        /* Executive Header Banner */
+        .dashboard-header {
+            background-color: var(--navy-dark);
+            color: #FFFFFF;
+            padding: 22px 28px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+        }
+
+        .header-title h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header-title p {
+            font-size: 13px;
+            color: #94A3B8;
+            margin-top: 4px;
+        }
+
+        .btn-export {
+            background-color: var(--blue-accent);
+            color: #FFFFFF;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-export:hover {
+            background-color: var(--blue-hover);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Executive KPI Summary Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            padding: 18px 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            transition: transform 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-value {
+            font-size: 26px;
+            font-weight: 700;
+            margin-top: 6px;
+            color: var(--navy-dark);
+        }
+
+        /* Filter Controls Bar */
+        .filters-panel {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: var(--navy-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .filter-group select, .filter-group input {
             width: 100%;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 320px;
-            max-height: 380px;
+            padding: 9px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: #FAFAFA;
+            font-size: 13px;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.2s;
         }
 
-        @media (max-width: 768px) {
-            .chart-container {
-                height: 280px;
-            }
+        .filter-group select:focus, .filter-group input:focus {
+            border-color: var(--blue-accent);
+            background-color: #FFFFFF;
         }
 
-        .glass-card {
-            background: rgba(30, 41, 59, 0.75);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        /* Comprehensive Data Table */
+        .table-container {
+            background: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
         }
 
-        .metric-glow-red { box-shadow: 0 0 20px rgba(225, 29, 72, 0.2); }
-        .metric-glow-amber { box-shadow: 0 0 20px rgba(245, 158, 11, 0.2); }
-        .metric-glow-blue { box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
-        .metric-glow-green { box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 12.5px;
+            white-space: nowrap;
+        }
 
-        .section-header {
-            border-left: 4px solid #3B82F6;
-            padding-left: 1rem;
+        thead {
+            background-color: var(--navy-mid);
+            color: #FFFFFF;
+        }
+
+        th {
+            padding: 12px 14px;
+            font-weight: 600;
+            font-size: 11.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        tbody tr:hover {
+            background-color: #F1F5F9;
+        }
+
+        /* Badges & Formatters */
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-asap { background-color: var(--status-red-bg); color: var(--status-red-text); }
+        .badge-aug { background-color: var(--status-yellow-bg); color: var(--status-yellow-text); }
+        .badge-sep { background-color: var(--status-blue-bg); color: var(--status-blue-text); }
+        .badge-nov { background-color: var(--status-gray-bg); color: var(--status-gray-text); }
+        .badge-none { background-color: #F3F4F6; color: #9CA3AF; }
+
+        .status-pill {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-shipment { background-color: var(--status-green-bg); color: var(--status-green-text); }
+        .status-onprocess { background-color: var(--status-yellow-bg); color: var(--status-yellow-text); }
+        .status-quote { background-color: var(--status-blue-bg); color: var(--status-blue-text); }
+        .status-exchange { background-color: #EDE9FE; color: #5B21B6; }
+        .status-verify { background-color: #FFEDD5; color: #C2410C; }
+        .status-pending { background-color: #FEE2E2; color: #991B1B; }
+        .status-cia { background-color: #FCE7F3; color: #9D174D; }
+        .status-na { background-color: #F1F5F9; color: #64748B; }
+
+        .code-block {
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            font-weight: 600;
+            color: var(--navy-dark);
+            background-color: #F1F5F9;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .wrap-text {
+            white-space: normal;
+            min-width: 200px;
+            max-width: 280px;
+            font-size: 12px;
+            color: #334155;
+        }
+
+        .btn-open {
+            background-color: var(--navy-dark);
+            color: #FFFFFF;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-open:hover {
+            background-color: var(--blue-accent);
+        }
+
+        /* Detail Modal Popup */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-card {
+            background: #FFFFFF;
+            width: 100%;
+            max-width: 680px;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            animation: modalFadeIn 0.25s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            background-color: var(--navy-dark);
+            color: #FFFFFF;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: #94A3B8;
+            font-size: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 0 4px;
+        }
+
+        .modal-close:hover {
+            color: #FFFFFF;
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .modal-field {
+            background: #F8FAFC;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-field.full-width {
+            grid-column: span 2;
+        }
+
+        .field-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .field-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--navy-dark);
+            word-break: break-word;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            font-size: 14px;
         }
 
         @media print {
-            .no-print {
-                display: none !important;
-            }
-            body {
-                background-color: #FFFFFF !important;
-                color: #0F172A !important;
-                font-size: 10pt;
-            }
-            .glass-card {
-                background: #FFFFFF !important;
-                border: 1px solid #E2E8F0 !important;
-                box-shadow: none !important;
-                color: #0F172A !important;
-                page-break-inside: avoid;
-            }
-            .text-white { color: #0F172A !important; }
-            .text-slate-400 { color: #475569 !important; }
-            .text-slate-300 { color: #334155 !important; }
-            .bg-slate-900\/60, .bg-slate-900\/80, .bg-slate-950 {
-                background-color: #F8FAFC !important;
-                border: 1px solid #CBD5E1 !important;
-            }
-            .chart-container {
-                max-height: 250px !important;
-            }
-            header {
-                position: static !important;
-                background-color: #1E293B !important;
-                color: #FFFFFF !important;
-            }
-            header .text-white { color: #FFFFFF !important; }
-            header .text-slate-400 { color: #94A3B8 !important; }
+            body { background-color: #FFFFFF; padding: 0; }
+            .btn-export, .filters-panel, .btn-open, .modal-overlay { display: none !important; }
+            .dashboard-header { background-color: #0F172A !important; -webkit-print-color-adjust: exact; }
+            th { background-color: #1E293B !important; -webkit-print-color-adjust: exact; }
+            .table-container { border: none; box-shadow: none; }
+            table { font-size: 10px; }
+            td, th { padding: 6px 8px; }
         }
     </style>
 </head>
-<body class="min-h-screen pb-12">
+<body>
 
-    <header class="border-b border-slate-800 bg-slate-900/90 sticky top-0 z-50 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <div class="flex items-center gap-3">
-                        <span class="text-2xl">✈️</span>
-                        <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight">EXECUTIVE MATERIALS LOGISTICS DASHBOARD</h1>
-                    </div>
-                    <p class="text-xs sm:text-sm text-blue-400 font-medium mt-0.5">Critical Material Monitoring (SCH / AD / Hard Time) — Thai Lion Air Technical Operations</p>
-                </div>
-                <div class="flex items-center gap-3 no-print">
-                    <div class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg text-right">
-                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Report Date</p>
-                        <p class="text-xs font-bold text-emerald-400 font-mono">19-AUG-2026</p>
-                    </div>
-                    <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 transition-all">
-                        <span>🖨️</span> Export to PDF
-                    </button>
+    <!-- Header Banner -->
+    <div class="dashboard-header">
+        <div class="header-title">
+            <h1>Critical Materials Logistics Dashboard</h1>
+            <p>Thai Lion Air — Schedule Maintenance, Hard Time & AD Part Evaluation (2026)</p>
+        </div>
+        <button class="btn-export" onclick="window.print()">
+            📄 Export / Save PDF
+        </button>
+    </div>
+
+    <!-- Executive Overview Metrics -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-label">Total Tracked Items</div>
+            <div class="kpi-value" id="metric-total">16</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">ASAP / Urgent Requirement</div>
+            <div class="kpi-value" id="metric-asap" style="color: #DC2626;">4</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">In-Process PO/RO Status</div>
+            <div class="kpi-value" id="metric-process" style="color: #D97706;">6</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">CIA Payment Terms</div>
+            <div class="kpi-value" id="metric-cia" style="color: #2563EB;">7</div>
+        </div>
+    </div>
+
+    <!-- Interactive Dropdown Filters -->
+    <div class="filters-panel">
+        <div class="panel-title">🔍 Executive Dropdown Filters</div>
+        <div class="filters-grid">
+            <div class="filter-group">
+                <label for="filter-due">Filter 1: Due Date / Urgency</label>
+                <select id="filter-due" onchange="applyFilters()">
+                    <option value="ALL">All Due Dates & Timelines</option>
+                    <option value="ASAP">ASAP / Critical Urgency</option>
+                    <option value="AUG">August 2026 (Near Due)</option>
+                    <option value="SEP">September 2026</option>
+                    <option value="NOV">November 2026</option>
+                    <option value="UNSPECIFIED">Unspecified / Open Date (-)</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-status">Filter 2: RQ Status & Priority</label>
+                <select id="filter-status" onchange="applyFilters()">
+                    <option value="ALL">All Statuses</option>
+                    <option value="SHIPMENT PROCESS">SHIPMENT PROCESS</option>
+                    <option value="ON PROCESS LT PO">ON PROCESS LT PO</option>
+                    <option value="QUOTE PROCESS">QUOTE PROCESS</option>
+                    <option value="EXCHANGE">EXCHANGE</option>
+                    <option value="TO BE VERIFIED">TO BE VERIFIED</option>
+                    <option value="PENDING PART REPLACEMENT">PENDING PART REPLACEMENT</option>
+                    <option value="PAYMENT PROCESS CIA">PAYMENT PROCESS CIA</option>
+                    <option value="-">Unassigned (-)</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-pic">Filter 3: Issues / PIC Responsible</label>
+                <select id="filter-pic" onchange="applyFilters()">
+                    <option value="ALL">All Responsible Teams / PIC</option>
+                    <option value="TEGUH">PAK TEGUH / PAK HAKIM</option>
+                    <option value="ARIE_NENDEN">PAK ARIE / BU NENDEN / BU FITRIA</option>
+                    <option value="ARIE_ERICK">PAK ARIE / PAK ERICK</option>
+                    <option value="-">Unassigned PIC (-)</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-search">Search Keyword (P/N, Description, A/C)</label>
+                <input type="text" id="filter-search" placeholder="e.g. 473957-4, HS-LVT, FAN BLADE..." onkeyup="applyFilters()">
+            </div>
+        </div>
+    </div>
+
+    <!-- Comprehensive Data Table -->
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Action</th>
+                    <th>NO.</th>
+                    <th>Due Date</th>
+                    <th>A/C Reg</th>
+                    <th>Type</th>
+                    <th>RQ No.</th>
+                    <th>P/N</th>
+                    <th>Description</th>
+                    <th>PO / RO / TO</th>
+                    <th>Term</th>
+                    <th>Vendor</th>
+                    <th>Status</th>
+                    <th>Details & Remarks</th>
+                    <th>PIC</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Detail View Modal -->
+    <div class="modal-overlay" id="detail-modal" onclick="closeModalOnBackdrop(event)">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modal-title">Material Details</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-grid" id="modal-content">
+                    <!-- Populated dynamically by JavaScript -->
                 </div>
             </div>
         </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-10">
-
-        <section class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            <div class="glass-card p-5 metric-glow-blue border-l-4 border-l-blue-500">
-                <div class="flex justify-between items-start">
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Request Items</p>
-                    <span class="p-1.5 bg-blue-500/10 text-blue-400 rounded-lg text-xs font-bold">2026 YTD</span>
-                </div>
-                <p class="text-3xl font-bold text-white mt-2">285</p>
-                <p class="text-xs text-slate-400 mt-1">Total Material RQs Processed</p>
-            </div>
-
-            <div class="glass-card p-5 metric-glow-green border-l-4 border-l-emerald-500">
-                <div class="flex justify-between items-start">
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Resolution Rate</p>
-                    <span class="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg text-xs font-bold">58.24%</span>
-                </div>
-                <p class="text-3xl font-bold text-emerald-400 mt-2">166 <span class="text-sm font-normal text-slate-400">RQs</span></p>
-                <p class="text-xs text-slate-400 mt-1">Successfully Closed Cases</p>
-            </div>
-
-            <div class="glass-card p-5 metric-glow-red border-l-4 border-l-rose-500">
-                <div class="flex justify-between items-start">
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">AOG Critical Risks</p>
-                    <span class="p-1.5 bg-rose-500/10 text-rose-400 rounded-lg text-xs font-bold">HIGH</span>
-                </div>
-                <p class="text-3xl font-bold text-rose-400 mt-2">2 <span class="text-sm font-normal text-slate-400">A/C</span></p>
-                <p class="text-xs text-slate-400 mt-1">HS-LVS & HS-LVT Impacted</p>
-            </div>
-
-            <div class="glass-card p-5 metric-glow-amber border-l-4 border-l-amber-500">
-                <div class="flex justify-between items-start">
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Financial Clearance</p>
-                    <span class="p-1.5 bg-amber-500/10 text-amber-400 rounded-lg text-xs font-bold">CIA HELD</span>
-                </div>
-                <p class="text-3xl font-bold text-amber-400 mt-2">3 <span class="text-sm font-normal text-slate-400">Orders</span></p>
-                <p class="text-xs text-slate-400 mt-1">Awaiting Advance Payment</p>
-            </div>
-        </section>
-
-        <section class="space-y-6">
-            <div class="section-header">
-                <h2 class="text-xl font-bold text-white">1. Operational Efficiency & Inventory Backlog Distribution</h2>
-                <p class="text-sm text-slate-400 mt-1">
-                    This section illustrates the resolution efficiency of spare part requisitions (RQs) and breaks down open backlog items across maintenance work scopes.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="glass-card p-6 flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-base font-bold text-white flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                                RQ Status Breakdown
-                            </h3>
-                            <span class="text-xs text-slate-400">Total: 285 Items</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="rqEfficiencyChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="mt-4 p-3 bg-slate-900/60 rounded-lg border border-slate-800 text-xs text-slate-300">
-                        <strong class="text-blue-400">Executive Insight:</strong> 58.24% of requisitions are fully cleared. However, 92 open cases (32.28%) and 26 purchase orders (9.12%) remain active, requiring structured expediting with suppliers and engineering teams.
-                    </div>
-                </div>
-
-                <div class="glass-card p-6 flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-base font-bold text-white flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                                Backlog Breakdown by Work Type
-                            </h3>
-                            <span class="text-xs text-slate-400">Closed vs Open Cases</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="backlogCategoryChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="mt-4 p-3 bg-slate-900/60 rounded-lg border border-slate-800 text-xs text-slate-300">
-                        <strong class="text-amber-400">Executive Insight:</strong> C-Check Components represent the highest concentration (24 cases), followed by Scheduled Maintenance (8 cases) and Hard Time Components (5 cases) requiring priority clearance.
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="space-y-6">
-            <div class="section-header">
-                <h2 class="text-xl font-bold text-white">2. Aircraft On Ground (AOG) & Critical Hard-Time Risks</h2>
-                <p class="text-sm text-slate-400 mt-1">
-                    High-priority components currently causing or directly threatening Aircraft On Ground (AOG) status, along with fleet expiration countdowns.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="glass-card p-6 border-l-4 border-l-rose-500">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <span class="px-2.5 py-1 bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-md">🔴 AOG CRITICAL</span>
-                            <h3 class="text-lg font-bold text-white mt-2">Battery Charger Assy (ISFD)</h3>
-                            <p class="text-xs font-mono text-slate-400">P/N: 312BS101-1</p>
-                        </div>
-                        <span class="text-xs text-rose-400 font-bold bg-rose-950/80 px-2.5 py-1 rounded border border-rose-800">Target: K171-D5</span>
-                    </div>
-
-                    <div class="space-y-3 text-sm">
-                        <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
-                            <p class="text-xs font-bold text-slate-300 uppercase mb-2">Impacted Aircraft & Deadlines</p>
-                            <div class="flex flex-wrap gap-2">
-                                <span class="bg-rose-950 border border-rose-700 text-rose-300 text-xs px-2 py-1 rounded font-mono font-bold">HS-LVS (AOG)</span>
-                                <span class="bg-amber-950 border border-amber-700 text-amber-300 text-xs px-2 py-1 rounded font-mono">HS-LGP (DUE: 27-AUG)</span>
-                                <span class="bg-slate-800 border border-slate-700 text-slate-300 text-xs px-2 py-1 rounded font-mono">HS-LWJ (DUE: 18-OCT)</span>
-                            </div>
-                        </div>
-                        <p class="text-slate-300 text-xs leading-relaxed">
-                            <strong class="text-white">Action & Logistics:</strong> Exchange order active (2 EA) for alternative P/N 312BS801-1. Transit in progress to warehouse K171-D5 under shipping reference TO2585712.
-                        </p>
-                        <div class="flex justify-between items-center pt-2 border-t border-slate-800 text-xs">
-                            <span class="text-slate-400">Assigned Support:</span>
-                            <span class="font-bold text-blue-400 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-800">Pak Arie / Pak Erick</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-card p-6 border-l-4 border-l-amber-500">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <span class="px-2.5 py-1 bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold rounded-md">🟡 FIRE BOTTLE BACKLOG</span>
-                            <h3 class="text-lg font-bold text-white mt-2">Bottle Assy-Fire A/C Mix Bay</h3>
-                            <p class="text-xs font-mono text-slate-400">P/N: 473957-4</p>
-                        </div>
-                        <span class="text-xs text-amber-400 font-bold bg-amber-950/80 px-2.5 py-1 rounded border border-amber-800">Vendor: AMETEK</span>
-                    </div>
-
-                    <div class="space-y-3 text-sm">
-                        <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
-                            <p class="text-xs font-bold text-slate-300 uppercase mb-2">Impacted Aircraft & Deadlines</p>
-                            <div class="flex flex-wrap gap-2">
-                                <span class="bg-rose-950 border border-rose-700 text-rose-300 text-xs px-2 py-1 rounded font-mono font-bold">HS-LVT (AOG - 31-AUG)</span>
-                                <span class="bg-amber-950 border border-amber-700 text-amber-300 text-xs px-2 py-1 rounded font-mono">HS-LGI (DUE: 31-AUG)</span>
-                                <span class="bg-slate-800 border border-slate-700 text-slate-300 text-xs px-2 py-1 rounded font-mono">HS-LVP (DUE: 30-SEP)</span>
-                            </div>
-                        </div>
-                        <p class="text-slate-300 text-xs leading-relaxed">
-                            <strong class="text-white">Action & Logistics:</strong> Pending warehouse transfer RO2452362 from K152 to D5. Tracking vendor delivery from AMETEK (Net 30 terms) per document RO2465620.
-                        </p>
-                        <div class="flex justify-between items-center pt-2 border-t border-slate-800 text-xs">
-                            <span class="text-slate-400">Assigned Support:</span>
-                            <span class="font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800">Pak Teguh / Pak Hakim</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="glass-card p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-base font-bold text-white flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-                        Fleet Deadline Proximity Index (Remaining Days)
-                    </h3>
-                    <span class="text-xs text-slate-400">Plotly Analytics</span>
-                </div>
-                <div id="plotlyTimelineChart" class="w-full h-80"></div>
-                <p class="text-xs text-slate-400 mt-2 text-center">
-                    Visual representation of remaining days before reaching critical replacement deadlines across tail numbers.
-                </p>
-            </div>
-        </section>
-
-        <section class="space-y-6">
-            <div class="section-header">
-                <h2 class="text-xl font-bold text-white">3. Financial Clearance (CIA) & Escalation Matrix</h2>
-                <p class="text-sm text-slate-400 mt-1">
-                    Cash-In-Advance (CIA) financial locks requiring management approval and Person-In-Charge (PIC) support matrix.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="glass-card p-6">
-                    <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
-                        <span class="text-lg">💳</span> Cash-In-Advance (CIA) Financial Blockades
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="p-4 bg-rose-950/30 border border-rose-800/50 rounded-xl">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="text-sm font-bold text-rose-300">Engine Fan Blades (48 EA)</h4>
-                                    <p class="text-xs font-mono text-slate-400">P/N: 340-001-817-0 | Vendor: CFM</p>
-                                </div>
-                                <span class="px-2 py-0.5 bg-rose-900 text-rose-200 text-[10px] font-bold rounded">Budget Review</span>
-                            </div>
-                            <p class="text-xs text-slate-300 mt-2">CFM advance payment order currently undergoing executive budget review.</p>
-                            <p class="text-xs font-bold text-blue-400 mt-2">Assigned Support: Pak Arie / Bu Ainur</p>
-                        </div>
-
-                        <div class="p-4 bg-amber-950/30 border border-amber-800/50 rounded-xl">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="text-sm font-bold text-amber-300">Springs (70 EA)</h4>
-                                    <p class="text-xs font-mono text-slate-400">P/N: 69-76131-2 | Vendor: Boeing</p>
-                                </div>
-                                <span class="px-2 py-0.5 bg-amber-900 text-amber-200 text-[10px] font-bold rounded">Pending Payment</span>
-                            </div>
-                            <p class="text-xs text-slate-300 mt-2">Awaiting wire release for Boeing Invoice 913096050 to initiate dispatch.</p>
-                            <p class="text-xs font-bold text-blue-400 mt-2">Assigned Support: Pak Arie / Bu Nenden / Bu Fitria</p>
-                        </div>
-
-                        <div class="p-4 bg-blue-950/30 border border-blue-800/50 rounded-xl">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="text-sm font-bold text-blue-300">Fuel Filter Element (128 EA)</h4>
-                                    <p class="text-xs font-mono text-slate-400">P/N: ACC462F2038 | Vendor: Boeing</p>
-                                </div>
-                                <span class="px-2 py-0.5 bg-blue-900 text-blue-200 text-[10px] font-bold rounded">Target HS-LTT</span>
-                            </div>
-                            <p class="text-xs text-slate-300 mt-2">Staged for aircraft HS-LTT P47 scheduled check in late August.</p>
-                            <p class="text-xs font-bold text-blue-400 mt-2">Assigned Support: Pak Arie / Bu Nenden</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-card p-6 flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-base font-bold text-white flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                                Support Case Allocation Matrix
-                            </h3>
-                            <span class="text-xs text-slate-400">92 Active Open RQs</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="picMatrixChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="mt-4 p-3 bg-slate-900/60 rounded-lg border border-slate-800 text-xs text-slate-300">
-                        <strong class="text-emerald-400">Executive Directive:</strong> Specialized assignment matrix ensuring direct resolution of zero-stock items and payment releases as first priority.
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <footer class="mt-16 border-t border-slate-800 bg-slate-950 py-8 text-center text-xs text-slate-500">
-        <p class="font-semibold text-slate-400">Thai Lion Air — Logistics & Engineering Technical Operations</p>
-        <p class="mt-1">Internal Executive Dashboard | Data Refreshed: 19-AUG-2026</p>
-    </footer>
+    </div>
 
     <script>
-        function wrapLabel(label) {
-            if (typeof label !== 'string') return label;
-            if (label.length <= 16) return label;
-            const words = label.split(' ');
-            const lines = [];
-            let currentLine = "";
-            words.forEach(word => {
-                if ((currentLine + word).length > 16) {
-                    lines.push(currentLine.trim());
-                    currentLine = word + " ";
-                } else {
-                    currentLine += word + " ";
-                }
+        // Grounded Raw Data strictly extracted from the provided Excel file (16 Rows)
+        const groundedData = [
+            { id: 0, no: "1", due: "31-AUG-2026", ac: "HS-LVT", type: "H/T THAI", rq: "1025203", avail_d5: "NIL", pn: "473957-4", desc: "BOTTLE ASSY-FIRE A/C MIX BAY", po: "RO2452362", term: "NET30", vendor: "AMETEK", status: "SHIPMENT PROCESS", details: "- SN.: 11259K : Pending R/I at K152. Pending transfer K152 – D5.", pic: "PAK TEGUH / PAK HAKIM", remarks: "-" },
+            { id: 1, no: "2", due: "31-AUG-2026", ac: "HS-LGI", type: "H/T THAI", rq: "1025203", avail_d5: "NIL", pn: "473957-4", desc: "BOTTLE ASSY-FIRE A/C MIX BAY", po: "RO2465620", term: "NET30", vendor: "AMETEK", status: "ON PROCESS LT PO", details: "Pending EDD., CIPL", pic: "PAK ARIE / BU NENDEN / BU FITRIA", remarks: "-" },
+            { id: 2, no: "3", due: "20-SEP-2026", ac: "HS-LVK", type: "H/T THAI", rq: "1045833", avail_d5: "NIL", pn: "508358-413", desc: "ELECTRONIC MODULE ASSY", po: "PO2499002", term: "NET30", vendor: "D4296", status: "ON PROCESS LT PO", details: "Partial shipment for 6 EA", pic: "PAK TEGUH / PAK HAKIM", remarks: "-" },
+            { id: 3, no: "4", due: "20-SEP-2026", ac: "HS-LVK", type: "H/T THAI", rq: "1082545", avail_d5: "NIL", pn: "572756-1", desc: "SWITCH -THERMAL COMPRESSORDISCHARGE", po: "RO2528519", term: "NET30", vendor: "ICA-USA-NC", status: "ON PROCESS LT PO", details: "Pending EDD., CIPL", pic: "PAK ARIE / BU NENDEN / BU FITRIA", remarks: "-" },
+            { id: 4, no: "5", due: "25-SEP-2026", ac: "HS-LVM", type: "H/T THAI", rq: "1017947", avail_d5: "NIL", pn: "898052", desc: "EXTINGUISHER-FIRE,PORTABLE", po: "RO2409240", term: "NET30", vendor: "VD-DAQ", status: "QUOTE PROCESS", details: "-", pic: "PAK ARIE / BU NENDEN / BU FITRIA", remarks: "-" },
+            { id: 5, no: "6", due: "26-SEP-2026", ac: "HS-LVK", type: "H/T THAI", rq: "1017947", avail_d5: "NIL", pn: "898052", desc: "EXTINGUISHER-FIRE,PORTABLE", po: "RO2452877", term: "NET30", vendor: "VD-DAQ", status: "EXCHANGE", details: "-", pic: "PAK ARIE / BU NENDEN / BU FITRIA", remarks: "-" },
+            { id: 6, no: "7", due: "30-SEP-2026", ac: "HS-LVU", type: "H/T THAI", rq: "1006211", avail_d5: "NIL", pn: "802300-14", desc: "SMOKE HOODS / PBE", po: "PO2415495​", term: "CIA", vendor: "VD-ZSA", status: "ON PROCESS LT PO", details: "EDD. Change to 08-SEP-2026 due to limit stock.", pic: "PAK ARIE / PAK ERICK", remarks: "-" },
+            { id: 7, no: "8", due: "30-SEP-2026", ac: "HS-LUZ", type: "H/T THAI", rq: "1006211", avail_d5: "NIL", pn: "802300-14", desc: "SMOKE HOODS / PBE", po: "PO2415495​", term: "CIA", vendor: "VD-ZSA", status: "ON PROCESS LT PO", details: "EDD. Change to 08-SEP-2026 due to limit stock.", pic: "PAK ARIE / PAK ERICK", remarks: "-" },
+            { id: 8, no: "-", due: "ASAP", ac: "31 A/C", type: "H/T THAI", rq: "925274", avail_d5: "NIL", pn: "1153158-2", desc: "SENSOR-ALTITUDE", po: "RO2487808", term: "NET30", vendor: "ICA-USA-NC", status: "QUOTE PROCESS", details: "-", pic: "PAK ARIE / BU NENDEN / BU FITRIA", remarks: "31 aircraft that have reached or are close to reaching 18,000 flight hours." },
+            { id: 9, no: "-", due: "18-NOV-2026", ac: "-", type: "ADSB THA", rq: "1025791", avail_d5: "NIL", pn: "MA30A1017", desc: "MOD C ACTUATOR", po: "-", term: "FOC", vendor: "-", status: "ON PROCESS LT PO", details: "-", pic: "-", remarks: "AD2018-20-13" },
+            { id: 10, no: "-", due: "ASAP", ac: "ON CON", type: "FND", rq: "1001871", avail_d5: "NIL", pn: "340-001-817-0", desc: "PLATFORM FAN BLADE", po: "PO2426286", term: "CIA", vendor: "VD-CFMI", status: "TO BE VERIFIED", details: "VAL# VAL/202601002517", pic: "-", remarks: "-" },
+            { id: 11, no: "-", due: "ASAP", ac: "ON CON", type: "FND", rq: "1001871", avail_d5: "NIL", pn: "340-001-817-0", desc: "PLATFORM FAN BLADE", po: "PO2426296", term: "CIA", vendor: "VD-CFMI", status: "TO BE VERIFIED", details: "VAL# VAL/202601002516", pic: "-", remarks: "-" },
+            { id: 12, no: "-", due: "ASAP", ac: "ON CON", type: "SCH THAI", rq: "1086090", avail_d5: "NIL", pn: "340-001-817-0", desc: "PLATFORM FAN BLADE", po: "RO2535706", term: "CIA", vendor: "GKN-IKP-MY", status: "-", details: "INV# 90168878", pic: "-", remarks: "-" },
+            { id: 13, no: "-", due: "-", ac: "-", type: "-", rq: "-", avail_d5: "-", pn: "ACC462F2038M", desc: "FILTER ELEMENT-FUEL", po: "PO2287821", term: "CIA", vendor: "BOE-SIN-SG", status: "PENDING PART REPLACEMENT", details: "-", pic: "-", remarks: "-" },
+            { id: 14, no: "-", due: "-", ac: "-", type: "-", rq: "-", avail_d5: "-", pn: "65C33095-5", desc: "GASKET", po: "PO2396545", term: "CIA", vendor: "BOE-SIN-SG", status: "PAYMENT PROCESS CIA", details: "-", pic: "-", remarks: "-" },
+            { id: 15, no: "-", due: "-", ac: "-", type: "-", rq: "-", avail_d5: "-", pn: "112W8216-1", desc: "GASKET", po: "PO2388786", term: "NET30", vendor: "VD-SLD", status: "-", details: "-", pic: "-", remarks: "-" }
+        ];
+
+        function renderTable(data) {
+            const tbody = document.getElementById("table-body");
+            tbody.innerHTML = "";
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="14" class="empty-state">No matching materials record found.</td></tr>`;
+                document.getElementById("metric-total").innerText = 0;
+                document.getElementById("metric-asap").innerText = 0;
+                document.getElementById("metric-process").innerText = 0;
+                document.getElementById("metric-cia").innerText = 0;
+                return;
+            }
+
+            data.forEach(item => {
+                // Due Date Badge Formatting
+                let dueBadge = `<span class="badge badge-none">${item.due}</span>`;
+                if (item.due === "ASAP") dueBadge = `<span class="badge badge-asap">ASAP</span>`;
+                else if (item.due.includes("AUG")) dueBadge = `<span class="badge badge-aug">${item.due}</span>`;
+                else if (item.due.includes("SEP")) dueBadge = `<span class="badge badge-sep">${item.due}</span>`;
+                else if (item.due.includes("NOV")) dueBadge = `<span class="badge badge-nov">${item.due}</span>`;
+
+                // Status Pill Formatting
+                let statusPill = `<span class="status-pill status-na">${item.status}</span>`;
+                if (item.status === "SHIPMENT PROCESS") statusPill = `<span class="status-pill status-shipment">SHIPMENT PROCESS</span>`;
+                else if (item.status === "ON PROCESS LT PO") statusPill = `<span class="status-pill status-onprocess">ON PROCESS LT PO</span>`;
+                else if (item.status === "QUOTE PROCESS") statusPill = `<span class="status-pill status-quote">QUOTE PROCESS</span>`;
+                else if (item.status === "EXCHANGE") statusPill = `<span class="status-pill status-exchange">EXCHANGE</span>`;
+                else if (item.status === "TO BE VERIFIED") statusPill = `<span class="status-pill status-verify">TO BE VERIFIED</span>`;
+                else if (item.status === "PENDING PART REPLACEMENT") statusPill = `<span class="status-pill status-pending">PENDING REPLACEMENT</span>`;
+                else if (item.status === "PAYMENT PROCESS CIA") statusPill = `<span class="status-pill status-cia">PAYMENT PROCESS CIA</span>`;
+
+                // Combined Details & Remarks for summary view
+                let detailArray = [];
+                if (item.details !== "-") detailArray.push(item.details);
+                if (item.remarks !== "-") detailArray.push(`<strong>Note:</strong> ${item.remarks}`);
+                const detailText = detailArray.length > 0 ? detailArray.join("<br>") : "-";
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>
+                        <button class="btn-open" onclick="openModal(${item.id})">
+                            🔍 Open
+                        </button>
+                    </td>
+                    <td>${item.no}</td>
+                    <td>${dueBadge}</td>
+                    <td><strong>${item.ac}</strong></td>
+                    <td>${item.type}</td>
+                    <td>${item.rq !== "-" ? `<span class="code-block">${item.rq}</span>` : "-"}</td>
+                    <td><span class="code-block">${item.pn}</span></td>
+                    <td><strong>${item.desc}</strong></td>
+                    <td>${item.po}</td>
+                    <td><strong>${item.term}</strong></td>
+                    <td>${item.vendor}</td>
+                    <td>${statusPill}</td>
+                    <td class="wrap-text">${detailText}</td>
+                    <td><small style="color: #475569; font-weight: 600;">${item.pic}</small></td>
+                `;
+                tbody.appendChild(tr);
             });
-            lines.push(currentLine.trim());
-            return lines;
+
+            // Update Real-time KPI Summary Metrics
+            document.getElementById("metric-total").innerText = data.length;
+            document.getElementById("metric-asap").innerText = data.filter(d => d.due === "ASAP").length;
+            document.getElementById("metric-process").innerText = data.filter(d => d.status === "ON PROCESS LT PO").length;
+            document.getElementById("metric-cia").innerText = data.filter(d => d.term === "CIA").length;
         }
 
-        const commonTooltipConfig = {
-            callbacks: {
-                title: function(tooltipItems) {
-                    const item = tooltipItems[0];
-                    let label = item.chart.data.labels[item.dataIndex];
-                    if (Array.isArray(label)) {
-                        return label.join(' ');
-                    } else {
-                        return label;
-                    }
-                }
-            }
-        };
+        function applyFilters() {
+            const dueVal = document.getElementById("filter-due").value;
+            const statusVal = document.getElementById("filter-status").value;
+            const picVal = document.getElementById("filter-pic").value;
+            const searchVal = document.getElementById("filter-search").value.toLowerCase().trim();
 
-        const ctxEfficiency = document.getElementById('rqEfficiencyChart').getContext('2d');
-        new Chart(ctxEfficiency, {
-            type: 'doughnut',
-            data: {
-                labels: [
-                    wrapLabel('Closed (166 RQs)'),
-                    wrapLabel('Open (92 RQs)'),
-                    wrapLabel('Order (26 RQs)'),
-                    wrapLabel('Cancelled (1 RQ)')
-                ],
-                datasets: [{
-                    data: [58.24, 32.28, 9.12, 0.35],
-                    backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#E11D48'],
-                    borderWidth: 0,
-                    hoverOffset: 12
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: { color: '#94A3B8', font: { family: 'Inter' } }
-                    },
-                    tooltip: commonTooltipConfig
-                },
-                cutout: '72%'
+            const filtered = groundedData.filter(item => {
+                // Due Date Filter
+                let matchDue = true;
+                if (dueVal === "ASAP") matchDue = item.due === "ASAP";
+                else if (dueVal === "AUG") matchDue = item.due.includes("AUG");
+                else if (dueVal === "SEP") matchDue = item.due.includes("SEP");
+                else if (dueVal === "NOV") matchDue = item.due.includes("NOV");
+                else if (dueVal === "UNSPECIFIED") matchDue = item.due === "-";
+
+                // Status Filter
+                let matchStatus = true;
+                if (statusVal !== "ALL") matchStatus = item.status === statusVal;
+
+                // PIC Filter
+                let matchPic = true;
+                if (picVal === "TEGUH") matchPic = item.pic.includes("TEGUH");
+                else if (picVal === "ARIE_NENDEN") matchPic = item.pic.includes("NENDEN");
+                else if (picVal === "ARIE_ERICK") matchPic = item.pic.includes("ERICK");
+                else if (picVal === "-") matchPic = item.pic === "-";
+
+                // Keyword Search Filter
+                let matchSearch = true;
+                if (searchVal) {
+                    const haystack = `${item.pn} ${item.desc} ${item.ac} ${item.po} ${item.vendor} ${item.details} ${item.remarks}`.toLowerCase();
+                    matchSearch = haystack.includes(searchVal);
+                }
+
+                return matchDue && matchStatus && matchPic && matchSearch;
+            });
+
+            renderTable(filtered);
+        }
+
+        /* Modal Functions for Open/View Details */
+        function openModal(id) {
+            const item = groundedData.find(d => d.id === id);
+            if (!item) return;
+
+            document.getElementById("modal-title").innerText = `P/N: ${item.pn} — ${item.desc}`;
+            
+            const modalContent = document.getElementById("modal-content");
+            modalContent.innerHTML = `
+                <div class="modal-field">
+                    <div class="field-label">NO.</div>
+                    <div class="field-value">${item.no}</div>
+                </div>
+                <div class="modal-field">
+                    <div class="field-label">Due Date</div>
+                    <div class="field-value">${item.due}</div>
+                </div>
+                <div class="modal-field">
+                    <div class="field-label">A/C Reg</div>
+                    <div class="field-value">${item.ac}</div>
+                </div>
+                <div class="modal-field">
+                    <div class="field-label">Maintenance Type</div>
+                    <div class="field-value">${item.type}</div>
+                </div>
+                <div class="modal-field">
+                    <div class="field-label">RQ Number</div>
+                    <div class="field-value">${item.rq}</div>
+                </div>
+                <div class="modal-field">
+                    <div class="field-label">Part Avail D5</div>
+                    <div class="field-value">${item.avail_d5}</div>
+                </div>
+                <div class="modal-field">
+                    <div class="field-label">Part Number</div>
+                    <div class="field-value">${item.pn}</div>
+                </div>
+                <div class="modal-field">
+                    <div class="field-label">Description</div>
+                    <div class="field-value">${item.desc}</div>
+                </div>
+                <div class="modal-field">
+                    <div class="field-label">PO / RO / TO</div>
+                    <div class="field-value">${item.po}</div>
+                </div>
+                <div class="modal-field">
+                    <div class="field-label">Payment Term</div>
+                    <div class="field-value">${item.term}</div>
+                </div>
+                <div class="modal-field">
+                    <div class="field-label">Vendor</div>
+                    <div class="field-value">${item.vendor}</div>
+                </div>
+                <div class="modal-field">
+                    <div class="field-label">Status</div>
+                    <div class="field-value">${item.status}</div>
+                </div>
+                <div class="modal-field full-width">
+                    <div class="field-label">Details / Serial Numbers / Tracking</div>
+                    <div class="field-value">${item.details}</div>
+                </div>
+                <div class="modal-field full-width">
+                    <div class="field-label">PIC (Person In Charge)</div>
+                    <div class="field-value">${item.pic}</div>
+                </div>
+                <div class="modal-field full-width">
+                    <div class="field-label">Remarks / Additional Notes</div>
+                    <div class="field-value">${item.remarks}</div>
+                </div>
+            `;
+
+            document.getElementById("detail-modal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("detail-modal").style.display = "none";
+        }
+
+        function closeModalOnBackdrop(event) {
+            if (event.target.id === "detail-modal") {
+                closeModal();
+            }
+        }
+
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "Escape") {
+                closeModal();
             }
         });
 
-        const ctxBacklog = document.getElementById('backlogCategoryChart').getContext('2d');
-        new Chart(ctxBacklog, {
-            type: 'bar',
-            data: {
-                labels: [
-                    wrapLabel('C-Check Components'),
-                    wrapLabel('Scheduled Maint 2026'),
-                    wrapLabel('Hard Time Parts'),
-                    wrapLabel('Aircraft Transfer')
-                ],
-                datasets: [
-                    {
-                        label: 'Closed Cases',
-                        data: [17, 6, 1, 0],
-                        backgroundColor: '#10B981',
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'Open Cases',
-                        data: [7, 2, 4, 3],
-                        backgroundColor: '#F59E0B',
-                        borderRadius: 6
-                    }
-                ]
-            },
-            options: {
-                maintainAspectRatio: false,
-                responsive: true,
-                scales: {
-                    x: {
-                        stacked: true,
-                        grid: { display: false },
-                        ticks: { color: '#94A3B8', font: { family: 'Inter' } }
-                    },
-                    y: {
-                        stacked: true,
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                        ticks: { color: '#94A3B8' }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: { color: '#94A3B8', font: { family: 'Inter' } }
-                    },
-                    tooltip: commonTooltipConfig
-                }
-            }
-        });
-
-        const ctxPic = document.getElementById('picMatrixChart').getContext('2d');
-        new Chart(ctxPic, {
-            type: 'bar',
-            data: {
-                labels: [
-                    wrapLabel('NIL Stock / Zero Asset'),
-                    wrapLabel('RO WTG Payment'),
-                    wrapLabel('PO Long Lead Time'),
-                    wrapLabel('Distribution Allocation')
-                ],
-                datasets: [{
-                    label: 'Assigned Cases Count',
-                    data: [35, 28, 18, 11],
-                    backgroundColor: ['#E11D48', '#F59E0B', '#3B82F6', '#10B981'],
-                    borderRadius: 8
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                        ticks: { color: '#94A3B8' }
-                    },
-                    y: {
-                        grid: { display: false },
-                        ticks: { color: '#94A3B8', font: { family: 'Inter' } }
-                    }
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: commonTooltipConfig
-                }
-            }
-        });
-
-        const plotlyData = [{
-            type: 'bar',
-            x: [8, 12, 32, 60],
-            y: ['HS-LVS (Battery)', 'HS-LVT (Fire Bottle)', 'HS-LGP (Battery)', 'HS-LVP (Fire Bottle)'],
-            orientation: 'h',
-            marker: {
-                color: ['#E11D48', '#E11D48', '#F59E0B', '#3B82F6'],
-                width: 0.6
-            }
-        }];
-
-        const plotlyLayout = {
-            margin: { l: 140, r: 20, t: 20, b: 40 },
-            paper_bgcolor: 'rgba(0,0,0,0)',
-            plot_bgcolor: 'rgba(0,0,0,0)',
-            xaxis: {
-                title: 'Days Remaining Until Deadline',
-                titlefont: { color: '#94A3B8', size: 12 },
-                tickfont: { color: '#94A3B8' },
-                gridcolor: 'rgba(255, 255, 255, 0.05)'
-            },
-            yaxis: {
-                tickfont: { color: '#F8FAFC', size: 12 },
-                gridcolor: 'rgba(255, 255, 255, 0.05)'
-            }
-        };
-
-        Plotly.newPlot('plotlyTimelineChart', plotlyData, plotlyLayout, {responsive: true, displayModeBar: false});
+        // Initial Page Render
+        renderTable(groundedData);
     </script>
 </body>
 </html>
